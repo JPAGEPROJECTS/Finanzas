@@ -50,15 +50,22 @@
   }
   * { box-sizing: border-box; }
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-  html, body { height: 100%; }
+  html, body {
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
     min-height: 100%;
     padding: 32px 20px 48px;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
   }
-  .wrap { max-width: 1000px; margin: 0 auto; }
+  .wrap { max-width: 1000px; margin: 0 auto; overflow-x: hidden; }
 
   header { margin-bottom: 28px; }
   .eyebrow { color: var(--accent); font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 0.02em; }
@@ -93,6 +100,8 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
     font-size: 13.5px;
     color: var(--muted);
     margin-bottom: 8px;
@@ -104,24 +113,29 @@
   }
   input[type="number"] {
     width: 100%;
+    min-height: 44px;
     background: var(--panel-raised);
     border: 1px solid var(--line);
     border-radius: 8px;
     color: var(--text);
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 17px;
+    font-size: 16px;
     padding: 11px 12px;
   }
   input[type="number"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   input[type="range"] {
     width: 100%;
     accent-color: var(--accent);
-    height: 22px;
+    height: 44px;
+    padding: 0;
   }
   .subfield-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
+  }
+  @media (max-width: 360px) {
+    .subfield-grid { grid-template-columns: 1fr; }
   }
 
   .divider { border: none; border-top: 1px solid var(--line); margin: 22px 0; }
@@ -132,7 +146,8 @@
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12.5px;
     cursor: pointer;
-    padding: 0;
+    padding: 12px 0;
+    min-height: 44px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -180,6 +195,8 @@
   .apply-btn {
     display: none;
     margin-top: 12px;
+    min-height: 44px;
+    width: 100%;
     background: var(--panel);
     border: 1px solid var(--line);
     color: var(--text);
@@ -190,8 +207,28 @@
     border-radius: 8px;
     cursor: pointer;
   }
-  .apply-btn.show { display: inline-block; }
+  .apply-btn.show { display: block; }
   .apply-btn:hover { border-color: var(--accent); }
+
+  .abono-card {
+    border-radius: 12px;
+    padding: 18px 20px;
+    border: 1px solid var(--line);
+    background: var(--panel-raised);
+  }
+  .abono-card-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .abono-card.active .abono-card-title { color: var(--accent); }
+  .abono-card-detail {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin-top: 5px;
+    line-height: 1.5;
+  }
   .headline-result {
     background: linear-gradient(180deg, var(--panel-raised), var(--panel));
     border: 1px solid var(--accent-dim);
@@ -254,6 +291,14 @@
     line-height: 1.6;
     max-width: 70ch;
   }
+
+  @media (max-width: 360px) {
+    body { padding-left: 14px; padding-right: 14px; }
+    .card { padding: 18px 16px; }
+    .headline-result { padding: 22px 18px; }
+    .result-card { padding: 14px; }
+    .ledger, .abono-card, .budget-banner { padding: 14px 16px; }
+  }
 </style>
 </head>
 <body>
@@ -279,6 +324,11 @@
       <div class="field">
         <label for="cuotaMax">Cuota máxima que puedes pagar <span class="val" id="cuotaMaxVal">$204.90</span></label>
         <input type="number" id="cuotaMax" value="204.9" min="1" step="0.1">
+      </div>
+
+      <div class="field">
+        <label for="abono">Abono extra mensual a capital <span class="val" id="abonoVal">$0</span></label>
+        <input type="number" id="abono" value="0" min="0" step="5">
       </div>
 
       <hr class="divider">
@@ -334,6 +384,21 @@
         <div class="line"><span>Intereses totales del plazo</span><span id="ledgerIntereses">$9,670.00</span></div>
         <div class="line"><span>Total a pagar en el plazo</span><span id="ledgerTotal">$19,670.40</span></div>
       </div>
+
+      <div class="abono-card" id="abonoCard">
+        <div class="abono-card-title" id="abonoTitle">sin abono extra, el plazo no cambia</div>
+        <div class="abono-card-detail" id="abonoDetail">agrega un abono mensual a capital para ver en cuánto se reduce el plazo.</div>
+        <div class="row-results" id="abonoResults" style="margin-top:14px;">
+          <div class="result-card">
+            <div class="label">Nuevo plazo</div>
+            <div class="number" id="outNuevoPlazo">96 meses</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Total a pagar (con abono)</div>
+            <div class="number" id="outTotalAbono">$19,670</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -346,6 +411,7 @@
   const montoInput = document.getElementById('monto');
   const plazoInput = document.getElementById('plazo');
   const cuotaMaxInput = document.getElementById('cuotaMax');
+  const abonoInput = document.getElementById('abono');
   const tasaInput = document.getElementById('tasa');
   const gastosInput = document.getElementById('gastos');
   const advToggle = document.getElementById('advToggle');
@@ -354,6 +420,7 @@
   const montoVal = document.getElementById('montoVal');
   const plazoVal = document.getElementById('plazoVal');
   const cuotaMaxVal = document.getElementById('cuotaMaxVal');
+  const abonoVal = document.getElementById('abonoVal');
   const tasaVal = document.getElementById('tasaVal');
   const gastosVal = document.getElementById('gastosVal');
 
@@ -361,6 +428,12 @@
   const budgetTitle = document.getElementById('budgetTitle');
   const budgetDetail = document.getElementById('budgetDetail');
   const applyMaxBtn = document.getElementById('applyMaxBtn');
+
+  const abonoCard = document.getElementById('abonoCard');
+  const abonoTitle = document.getElementById('abonoTitle');
+  const abonoDetail = document.getElementById('abonoDetail');
+  const outNuevoPlazo = document.getElementById('outNuevoPlazo');
+  const outTotalAbono = document.getElementById('outTotalAbono');
 
   const outLiquidez = document.getElementById('outLiquidez');
   const outLiquidezSub = document.getElementById('outLiquidezSub');
@@ -397,10 +470,33 @@
     return cuotaCap * (1 - Math.pow(1 + r, -n)) / r;
   }
 
+  function simulateAbono(monto, r, cuota, abono) {
+    let balance = monto;
+    let months = 0;
+    let totalPaid = 0;
+    const pagoBase = cuota + abono;
+    const safetyCap = 1200;
+    while (balance > 0.01 && months < safetyCap) {
+      const interes = balance * r;
+      const reduccionCapital = pagoBase - interes;
+      if (reduccionCapital <= 0) { months = safetyCap; break; } // el pago no cubre ni el interés
+      if (reduccionCapital >= balance) {
+        totalPaid += balance + interes;
+        balance = 0;
+      } else {
+        balance -= reduccionCapital;
+        totalPaid += pagoBase;
+      }
+      months++;
+    }
+    return { months, totalPaid };
+  }
+
   function calc() {
     const monto = parseFloat(montoInput.value) || 0;
     const n = parseInt(plazoInput.value, 10);
     const cuotaCap = parseFloat(cuotaMaxInput.value) || 0;
+    const abono = parseFloat(abonoInput.value) || 0;
 
     if (!manualTasa) tasaInput.value = estimateRate(n).toFixed(3);
     if (!manualGastos) gastosInput.value = DEFAULT_FEE_PCT.toFixed(2);
@@ -418,6 +514,7 @@
     montoVal.textContent = money(monto).replace('.00', '');
     plazoVal.textContent = n + ' meses';
     cuotaMaxVal.textContent = money(cuotaCap);
+    abonoVal.textContent = money(abono).replace('.00', '');
     tasaVal.textContent = tasaPct.toFixed(2) + '%/mes';
     gastosVal.textContent = gastosPct.toFixed(2) + '%';
 
@@ -446,11 +543,38 @@
       budgetDetail.textContent = `la cuota de ${money(cuota)} queda por debajo de tu límite de ${money(cuotaCap)}. A este plazo podrías pedir hasta ${money(maxMonto).replace('.00','')} sin pasarte.`;
       applyMaxBtn.classList.remove('show');
     }
+
+    // simulación de abono extra a capital
+    if (abono <= 0) {
+      abonoCard.classList.remove('active');
+      abonoTitle.textContent = 'sin abono extra, el plazo no cambia';
+      abonoDetail.textContent = 'agrega un abono mensual a capital para ver en cuánto se reduce el plazo.';
+      outNuevoPlazo.textContent = n + ' meses';
+      outTotalAbono.textContent = money(totalPagar);
+    } else {
+      const sim = simulateAbono(monto, r, cuota, abono);
+      if (sim.months >= 1200) {
+        abonoCard.classList.remove('active');
+        abonoTitle.textContent = 'ese abono no alcanza a cubrir ni el interés';
+        abonoDetail.textContent = 'con la cuota y el abono actuales, el saldo no baja. Sube el abono extra o revisa la tasa.';
+        outNuevoPlazo.textContent = '—';
+        outTotalAbono.textContent = '—';
+      } else {
+        const mesesAhorrados = n - sim.months;
+        const ahorroIntereses = totalPagar - sim.totalPaid;
+        abonoCard.classList.add('active');
+        abonoTitle.textContent = `terminas de pagar ${mesesAhorrados > 0 ? mesesAhorrados + ' meses antes' : 'igual'}`;
+        abonoDetail.textContent = `con ${money(abono).replace('.00','')} extra al mes, el préstamo se paga en ${sim.months} meses en vez de ${n}, y ahorras ${money(Math.max(ahorroIntereses,0))} en intereses.`;
+        outNuevoPlazo.textContent = sim.months + ' meses';
+        outTotalAbono.textContent = money(sim.totalPaid);
+      }
+    }
   }
 
   montoInput.addEventListener('input', calc);
   plazoInput.addEventListener('input', calc);
   cuotaMaxInput.addEventListener('input', calc);
+  abonoInput.addEventListener('input', calc);
   tasaInput.addEventListener('input', () => { manualTasa = true; calc(); });
   gastosInput.addEventListener('input', () => { manualGastos = true; calc(); });
   applyMaxBtn.addEventListener('click', () => {

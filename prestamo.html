@@ -2,785 +2,473 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulador de Préstamo Personal — Banco General Panamá</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculadora de préstamo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --blue-50: #e6f1fb;
-    --blue-100: #b5d4f4;
-    --blue-600: #185fa5;
-    --blue-800: #0c447c;
-    --blue-900: #042c53;
-    --bg: #f5f7fa;
-    --surface: #ffffff;
-    --surface2: #f0f4f8;
-    --border: rgba(0,0,0,0.08);
-    --text: #1a1a2e;
-    --text2: #5a6475;
-    --text3: #9099a8;
-    --green: #0f6e56;
-    --green-bg: #eaf3de;
-    --green-text: #27500a;
-    --red: #a32d2d;
-    --red-bg: #fcebeb;
-    --red-text: #791f1f;
-    --amber: #854f0b;
-    --amber-bg: #faeeda;
-    --amber-text: #633806;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.04);
+    --bg: #0E1420;
+    --panel: #161E2E;
+    --panel-raised: #1C2637;
+    --line: #2A3549;
+    --text: #E9EDF4;
+    --muted: #8A94A8;
+    --accent: #5FD6A8;
+    --accent-dim: #2E4A40;
+    --warn: #E8B96A;
+
+    font-family: 'Inter', system-ui, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #F5F3EE;
+      --panel: #FFFFFF;
+      --panel-raised: #FBFAF7;
+      --line: #DEDAD0;
+      --text: #1B2027;
+      --muted: #6B7280;
+      --accent: #147A55;
+      --accent-dim: #DCEFE5;
+      --warn: #9C6B1C;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F5F3EE;
+    --panel: #FFFFFF;
+    --panel-raised: #FBFAF7;
+    --line: #DEDAD0;
+    --text: #1B2027;
+    --muted: #6B7280;
+    --accent: #147A55;
+    --accent-dim: #DCEFE5;
+    --warn: #9C6B1C;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  html, body { height: 100%; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    margin: 0;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
-    line-height: 1.5;
+    min-height: 100%;
+    padding: 32px 20px 48px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  .eyebrow { color: var(--accent); font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 0.02em; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(28px, 5vw, 40px);
+    margin: 6px 0 8px;
+    line-height: 1.1;
+  }
+  header p { color: var(--muted); max-width: 60ch; line-height: 1.5; margin: 0; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 20px;
+  }
+  @media (max-width: 780px) {
+    .grid { grid-template-columns: 1fr; }
   }
 
-  /* ── Header ── */
-  .header {
-    background: var(--blue-900);
-    padding: 1.5rem 2rem;
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+  }
+
+  .field { margin-bottom: 22px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .field label span.val {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text);
+    font-size: 14px;
+  }
+  input[type="number"] {
+    width: 100%;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 17px;
+    padding: 11px 12px;
+  }
+  input[type="number"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 22px;
+  }
+  .subfield-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .divider { border: none; border-top: 1px solid var(--line); margin: 22px 0; }
+  .adv-toggle {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    cursor: pointer;
+    padding: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
+    gap: 6px;
   }
-  .header-left { display: flex; align-items: center; gap: 14px; }
-  .logo {
-    width: 44px; height: 44px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 15px; color: #fff;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.2);
+  .adv-toggle svg { transition: transform 0.15s ease; }
+  .adv-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+  .adv-panel {
+    display: none;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line);
   }
-  .header h1 { font-size: 18px; font-weight: 600; color: #fff; }
-  .header p { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-  .header-badge {
-    font-size: 11px; color: rgba(255,255,255,0.7);
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 5px 12px; border-radius: 20px;
-    background: rgba(255,255,255,0.07);
-  }
+  .adv-panel.open { display: block; }
+  .adv-note { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 10px 0 0; }
 
-  /* ── Layout ── */
-  .page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .results { display: flex; flex-direction: column; gap: 14px; }
 
-  /* ── Alert ── */
-  .alert {
-    background: var(--amber-bg);
-    border-left: 3px solid #ef9f27;
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    padding: 12px 16px;
-    margin-bottom: 1.5rem;
-    font-size: 13px;
-    color: var(--amber-text);
-    line-height: 1.6;
+  .budget-banner {
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1px solid var(--accent-dim);
+    background: var(--accent-dim);
   }
-
-  /* ── Section label ── */
-  .slabel {
-    font-size: 10px;
+  .budget-banner.over {
+    border-color: #6B3A2A;
+    background: #2A1E17;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .budget-banner.over { background: #FBEAE0; border-color: #E3B196; }
+  }
+  :root[data-theme="light"] .budget-banner.over { background: #FBEAE0; border-color: #E3B196; }
+  .budget-banner-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
     font-weight: 600;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 10px;
+    color: var(--accent);
   }
-
-  /* ── Control panel ── */
-  .ctrl-panel {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+  .budget-banner.over .budget-banner-title { color: var(--warn); }
+  .budget-banner-detail {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+    line-height: 1.5;
   }
-  .ctrl-panel .panel-title {
-    font-size: 13px; font-weight: 600; color: var(--text2);
-    margin-bottom: 1.25rem;
-    display: flex; align-items: center; gap: 7px;
-  }
-  .ctrl-panel .panel-title svg { opacity: .5; }
-  .ctrl-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1.25rem;
-  }
-  .ci label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 5px; }
-  .ci .cv { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .ci .cv.blue { color: var(--blue-600); }
-  .ci .cv.warn { color: var(--red); }
-  .ci .cv.muted { color: var(--text2); }
-  .ci input[type=range] {
-    width: 100%;
-    -webkit-appearance: none;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--blue-100);
-    outline: none;
+  .apply-btn {
+    display: none;
+    margin-top: 12px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 8px;
     cursor: pointer;
   }
-  .ci input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: var(--blue-600);
-    border: 2px solid #fff;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  .apply-btn.show { display: inline-block; }
+  .apply-btn:hover { border-color: var(--accent); }
+  .headline-result {
+    background: linear-gradient(180deg, var(--panel-raised), var(--panel));
+    border: 1px solid var(--accent-dim);
+    border-radius: 14px;
+    padding: 26px 24px;
   }
-  .ci input[type=range]:disabled { opacity: .35; cursor: default; }
-  .ci .ci-note { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .headline-result .label { color: var(--muted); font-size: 13.5px; margin-bottom: 6px; }
+  .headline-result .number {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(34px, 6vw, 48px);
+    color: var(--accent);
+    line-height: 1;
+  }
+  .headline-result .sub { color: var(--muted); font-size: 13px; margin-top: 8px; }
 
-  /* ── KPI cards ── */
-  .kpi-grid {
+  .row-results {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
   }
-  .kpi {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 1rem 1.1rem;
-    box-shadow: var(--shadow);
+  @media (max-width: 480px) {
+    .row-results { grid-template-columns: 1fr; }
   }
-  .kpi .kl { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
-  .kpi .kv { font-size: 19px; font-weight: 600; color: var(--text); }
-  .kpi .kv.blue { color: var(--blue-600); }
-  .kpi .kv.green { color: var(--green); }
-  .kpi .kv.red { color: var(--red); }
-  .kpi .kv.amber { color: var(--amber); }
-  .kpi .ksub { font-size: 11px; color: var(--text3); margin-top: 3px; }
-
-  /* ── Hero desembolso ── */
-  .hero-row {
-    display: grid;
-    grid-template-columns: minmax(0,1.5fr) minmax(0,1fr);
-    gap: 12px;
-    margin-bottom: 1.5rem;
-    align-items: start;
+  .result-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
   }
-  .hero-card {
-    background: var(--blue-900);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem 1.75rem;
-    text-align: center;
-  }
-  .hero-card .hl { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
-  .hero-card .hv { font-size: 44px; font-weight: 700; color: #fff; letter-spacing: -.5px; }
-  .hero-card .hsub { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
-
-  .pct-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-    box-shadow: var(--shadow);
-    display: flex; flex-direction: column; gap: 14px;
-  }
-  .pct-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-  .pct-row .pr-label { color: var(--text2); }
-  .pct-row .pr-val { font-weight: 600; color: var(--text); }
-
-  /* ── Desembolso breakdown ── */
-  .db-block { margin-bottom: 1.5rem; }
-  .db-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 16px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 5px;
-    font-size: 13px;
-  }
-  .db-row.sol { background: var(--blue-50); color: var(--blue-800); }
-  .db-row.neg { background: var(--red-bg); color: var(--red-text); }
-  .db-row.net { background: var(--green-bg); color: var(--green-text); font-weight: 600; font-size: 14px; }
-  .db-row .dr-sub { font-size: 11px; opacity: .7; margin-top: 2px; }
-  .db-row .dr-icon { margin-right: 8px; }
-
-  /* ── Distribution bar ── */
-  .bar-section { margin-bottom: 1.5rem; }
-  .bar-outer {
-    height: 28px;
-    border-radius: var(--radius-sm);
-    background: var(--surface2);
-    overflow: hidden;
-    display: flex;
-    margin-bottom: 10px;
-  }
-  .bseg {
-    height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 600;
-    color: #fff;
-    transition: width .4s ease;
-  }
-  .bar-legend {
-    display: flex; flex-wrap: wrap; gap: 14px;
-    font-size: 12px; color: var(--text2);
-  }
-  .bl-dot {
-    width: 10px; height: 10px;
-    border-radius: 2px;
-    display: inline-block;
-    margin-right: 5px;
-    vertical-align: middle;
-  }
-
-  /* ── Charts row ── */
-  .charts-row {
-    display: grid;
-    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    gap: 12px;
-    margin-bottom: 1.5rem;
-  }
-  .chart-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 1.25rem;
-    box-shadow: var(--shadow);
-  }
-  .chart-card .slabel { margin-bottom: 12px; }
-  .chart-wrap { position: relative; width: 100%; height: 220px; }
-
-  /* ── Amortization table ── */
-  .table-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-  }
-  .table-card .table-head {
-    padding: 1rem 1.25rem .75rem;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .table-scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th {
-    background: var(--surface2);
-    padding: 9px 14px;
-    text-align: left;
+  .result-card .label { color: var(--muted); font-size: 12.5px; margin-bottom: 6px; }
+  .result-card .number {
+    font-family: 'IBM Plex Mono', monospace;
     font-weight: 600;
-    color: var(--text2);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    white-space: nowrap;
+    font-size: 22px;
   }
-  td { padding: 8px 14px; border-top: 1px solid var(--border); color: var(--text); }
-  tbody tr:hover td { background: var(--surface2); }
-  td.c-blue { color: var(--blue-600); font-weight: 500; }
-  td.c-green { color: var(--green); }
-  td.c-red { color: var(--red); }
-  td.c-amber { color: var(--amber); }
-  td.c-gray { color: var(--text2); }
 
-  /* ── Tips ── */
-  .tips-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    margin-bottom: 1.5rem;
+  .ledger {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
   }
-  .tip-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 1.1rem 1.25rem;
-    box-shadow: var(--shadow);
+  .ledger .line {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
   }
-  .tip-card .tip-icon {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    background: var(--blue-50);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 10px;
-  }
-  .tip-card .tip-icon svg { color: var(--blue-600); }
-  .tip-card .tt { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-  .tip-card .td { font-size: 12px; color: var(--text2); line-height: 1.55; }
+  .ledger .line:last-child { border-bottom: none; }
+  .ledger .line span:last-child { color: var(--text); }
 
-  /* ── Footer note ── */
-  .footnote {
-    font-size: 11px;
-    color: var(--text3);
-    line-height: 1.7;
-    border-top: 1px solid var(--border);
-    padding-top: 1.25rem;
-    margin-top: .5rem;
-  }
-  .footnote a { color: var(--blue-600); text-decoration: none; }
-  .footnote a:hover { text-decoration: underline; }
-
-  /* ── Responsive ── */
-  @media (max-width: 680px) {
-    .page { padding: 1.25rem 1rem 3rem; }
-    .header { padding: 1.25rem 1rem; }
-    .hero-row { grid-template-columns: 1fr; }
-    .charts-row { grid-template-columns: 1fr; }
-    .hero-card .hv { font-size: 34px; }
+  footer.note {
+    margin-top: 24px;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.6;
+    max-width: 70ch;
   }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">calculadora personal</div>
+    <h1>¿Cuánto recibo y cuánto termino pagando?</h1>
+    <p>Ingresa el monto que quieres pedir prestado y el plazo en meses. La calculadora estima la tasa de interés y el monto de liquidez a partir de dos cotizaciones reales que diste (14,000 a 144 meses y 7,000 a 48 meses) — ajusta la tasa y los gastos abajo si tu financiera te da cifras distintas.</p>
+  </header>
 
-<header class="header">
-  <div class="header-left">
-    <div class="logo">BG</div>
-    <div>
-      <h1>Simulador de Préstamo Personal</h1>
-      <p>Banco General Panamá · Estimación referencial · 2026</p>
-    </div>
-  </div>
-  <span class="header-badge">Ajusta los sliders para explorar</span>
-</header>
+  <div class="grid">
+    <div class="card">
+      <div class="field">
+        <label for="monto">Monto del préstamo <span class="val" id="montoVal">$10,000</span></label>
+        <input type="number" id="monto" value="10000" min="500" step="100">
+      </div>
 
-<main class="page">
+      <div class="field">
+        <label for="plazo">Plazo a pagar <span class="val" id="plazoVal">96 meses</span></label>
+        <input type="range" id="plazo" min="6" max="180" step="1" value="96">
+      </div>
 
-  <div class="alert">
-    <strong>Lo que muchos no saben:</strong> el banco aprueba el monto que pediste, pero descuenta la comisión de manejo (+ ITBMS 7%) y el seguro de vida directamente del desembolso. Pagas cuotas sobre el monto completo, pero recibes menos dinero del que solicitaste.
-  </div>
+      <div class="field">
+        <label for="cuotaMax">Cuota máxima que puedes pagar <span class="val" id="cuotaMaxVal">$204.90</span></label>
+        <input type="number" id="cuotaMax" value="204.9" min="1" step="0.1">
+      </div>
 
-  <!-- Controls -->
-  <div class="ctrl-panel">
-    <div class="panel-title">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V4M4 8l8-8 8 8"/></svg>
-      Parámetros del préstamo
-    </div>
-    <div class="ctrl-grid">
-      <div class="ci">
-        <label>Monto solicitado</label>
-        <div class="cv blue" id="cMonto">$15,000</div>
-        <input type="range" id="sMonto" min="2000" max="65000" step="500" value="15000">
-        <div class="ci-note">$2,000 – $65,000</div>
-      </div>
-      <div class="ci">
-        <label>Plazo</label>
-        <div class="cv" id="cPlazo">36 meses</div>
-        <input type="range" id="sPlazo" min="12" max="84" step="6" value="36">
-        <div class="ci-note">12 – 84 meses</div>
-      </div>
-      <div class="ci">
-        <label>Tasa banco (anual)</label>
-        <div class="cv" id="cTasa">9.75%</div>
-        <input type="range" id="sTasa" min="8" max="14" step="0.25" value="9.75">
-        <div class="ci-note">Rango típico BG: 9–12%</div>
-      </div>
-      <div class="ci">
-        <label>FECI (sobretasa legal)</label>
-        <div class="cv muted">+1.00% fijo</div>
-        <input type="range" disabled min="1" max="1" value="1">
-        <div class="ci-note">Aplica para préstamos &gt;$5,000</div>
-      </div>
-      <div class="ci">
-        <label>Comisión de manejo</label>
-        <div class="cv warn" id="cCom">2.00%</div>
-        <input type="range" id="sCom" min="1" max="3" step="0.25" value="2">
-        <div class="ci-note">Negociable: 1–3% + ITBMS</div>
-      </div>
-      <div class="ci">
-        <label>Seguro de vida</label>
-        <div class="cv warn" id="cSeg">$187</div>
-        <input type="range" id="sSeg" min="50" max="600" step="10" value="187">
-        <div class="ci-note">Estimado según edad y plazo</div>
-      </div>
-    </div>
-  </div>
+      <hr class="divider">
 
-  <!-- KPIs -->
-  <div class="slabel">Resumen del préstamo</div>
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="kl">Cuota mensual</div>
-      <div class="kv blue" id="kCuota">—</div>
-      <div class="ksub">Pago fijo cada mes</div>
-    </div>
-    <div class="kpi">
-      <div class="kl">Dinero en mano</div>
-      <div class="kv green" id="kNeto">—</div>
-      <div class="ksub" id="kNetoPct">del monto aprobado</div>
-    </div>
-    <div class="kpi">
-      <div class="kl">Total a pagar</div>
-      <div class="kv red" id="kTotal">—</div>
-      <div class="ksub">Suma de todas las cuotas</div>
-    </div>
-    <div class="kpi">
-      <div class="kl">Costo financiero</div>
-      <div class="kv amber" id="kCosto">—</div>
-      <div class="ksub">Intereses + FECI acumulados</div>
-    </div>
-    <div class="kpi">
-      <div class="kl">Tasa efectiva anual</div>
-      <div class="kv" id="kTasaEf">—</div>
-      <div class="ksub">Banco + FECI incluido</div>
-    </div>
-    <div class="kpi">
-      <div class="kl">Deducciones al inicio</div>
-      <div class="kv red" id="kDed">—</div>
-      <div class="ksub">Comisión + seguro</div>
-    </div>
-  </div>
+      <button class="adv-toggle" id="advToggle" aria-expanded="false">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 1L8 5L2 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        ajustar tasa y gastos manualmente
+      </button>
 
-  <!-- Hero desembolso -->
-  <div class="slabel">¿Cuánto dinero recibes realmente?</div>
-  <div class="hero-row">
-    <div class="hero-card">
-      <div class="hl">Dinero neto que llega a tu cuenta</div>
-      <div class="hv" id="heroAmt">—</div>
-      <div class="hsub" id="heroSub">de $15,000 solicitados</div>
+      <div class="adv-panel" id="advPanel">
+        <div class="subfield-grid">
+          <div class="field">
+            <label for="tasa">Tasa mensual <span class="val" id="tasaVal">—</span></label>
+            <input type="number" id="tasa" step="0.01" min="0" max="10">
+          </div>
+          <div class="field">
+            <label for="gastos">Gastos / seguro <span class="val" id="gastosVal">—</span></label>
+            <input type="number" id="gastos" step="0.1" min="0" max="50">
+          </div>
+        </div>
+        <p class="adv-note">La tasa se autocompleta al cambiar el plazo, interpolando entre tus dos cotizaciones. Los gastos usan por defecto el 12.86% que resultó de tu opción 1 (14,000 → 12,200 de liquidez). Edítalos si tu financiera te confirma otras cifras.</p>
+      </div>
     </div>
-    <div class="pct-card">
-      <div class="slabel" style="margin-bottom:4px;">Composición del desembolso</div>
-      <div class="pct-row">
-        <span class="pr-label">Monto aprobado</span>
-        <span class="pr-val" id="pctMonto">—</span>
+
+    <div class="results">
+      <div class="budget-banner" id="budgetBanner">
+        <div class="budget-banner-title" id="budgetTitle">✓ dentro de tu presupuesto</div>
+        <div class="budget-banner-detail" id="budgetDetail">la cuota queda por debajo de tu límite de $204.90</div>
+        <button class="apply-btn" id="applyMaxBtn" type="button">usar $9,000 como monto (el máximo a este plazo)</button>
       </div>
-      <div class="pct-row" style="color:var(--red-text);">
-        <span class="pr-label">Comisión (+ ITBMS)</span>
-        <span class="pr-val" id="pctCom">—</span>
+
+      <div class="headline-result">
+        <div class="label">Monto de liquidez (lo que recibes)</div>
+        <div class="number" id="outLiquidez">$8,714</div>
+        <div class="sub" id="outLiquidezSub">del préstamo de $10,000, tras 12.86% en gastos y seguro</div>
       </div>
-      <div class="pct-row" style="color:var(--red-text);">
-        <span class="pr-label">Seguro de vida</span>
-        <span class="pr-val" id="pctSeg">—</span>
+
+      <div class="row-results">
+        <div class="result-card">
+          <div class="label">Cuota mensual</div>
+          <div class="number" id="outCuota">$204.90</div>
+        </div>
+        <div class="result-card">
+          <div class="label">Total a pagar</div>
+          <div class="number" id="outTotal">$19,670</div>
+        </div>
       </div>
-      <hr style="border:none;border-top:1px solid var(--border);">
-      <div class="pct-row" style="color:var(--green);">
-        <span class="pr-label" style="font-weight:600;">Neto recibido</span>
-        <span class="pr-val" id="pctNeto">—</span>
+
+      <div class="ledger">
+        <div class="line"><span>Monto del préstamo</span><span id="ledgerMonto">$10,000.00</span></div>
+        <div class="line"><span>Gastos / seguro estimados</span><span id="ledgerGastos">−$1,286.00</span></div>
+        <div class="line"><span>Liquidez a recibir</span><span id="ledgerLiquidez">$8,714.00</span></div>
+        <div class="line"><span>Intereses totales del plazo</span><span id="ledgerIntereses">$9,670.00</span></div>
+        <div class="line"><span>Total a pagar en el plazo</span><span id="ledgerTotal">$19,670.40</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Desembolso breakdown -->
-  <div class="slabel">Desglose del desembolso</div>
-  <div class="db-block">
-    <div class="db-row sol">
-      <div>✓&nbsp; Monto aprobado por el banco</div>
-      <strong id="dbMonto">—</strong>
-    </div>
-    <div class="db-row neg">
-      <div>
-        <div>−&nbsp; Comisión de manejo + ITBMS 7%</div>
-        <div class="dr-sub" id="dbComNote">2% del monto + 7% ITBMS</div>
-      </div>
-      <strong id="dbCom">—</strong>
-    </div>
-    <div class="db-row neg">
-      <div>
-        <div>−&nbsp; Seguro de vida desgravamen</div>
-        <div class="dr-sub">Prima pagada al inicio del préstamo</div>
-      </div>
-      <strong id="dbSeg">—</strong>
-    </div>
-    <div class="db-row net">
-      <span>💵&nbsp; Dinero neto que recibes en cuenta</span>
-      <strong id="dbNeto">—</strong>
-    </div>
-  </div>
-
-  <!-- Distribution bar -->
-  <div class="slabel">Distribución de cada dólar que pagas</div>
-  <div class="bar-section">
-    <div class="bar-outer">
-      <div class="bseg" id="bCapital" style="background:#185fa5;"></div>
-      <div class="bseg" id="bInteres" style="background:#e24b4a;"></div>
-      <div class="bseg" id="bFeci" style="background:#ef9f27;"></div>
-      <div class="bseg" id="bDed" style="background:#888780;"></div>
-    </div>
-    <div class="bar-legend">
-      <span><span class="bl-dot" style="background:#185fa5;"></span>Capital <strong id="lgCap">—</strong></span>
-      <span><span class="bl-dot" style="background:#e24b4a;"></span>Intereses <strong id="lgInt">—</strong></span>
-      <span><span class="bl-dot" style="background:#ef9f27;"></span>FECI <strong id="lgFeci">—</strong></span>
-      <span><span class="bl-dot" style="background:#888780;"></span>Comisión + seguro <strong id="lgDed">—</strong></span>
-    </div>
-  </div>
-
-  <!-- Charts -->
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="slabel">Pago de capital e intereses por año</div>
-      <div class="chart-wrap">
-        <canvas id="chartBar" role="img" aria-label="Barras apiladas mostrando capital, intereses y FECI por año del préstamo">Distribución anual de pagos.</canvas>
-      </div>
-      <div class="bar-legend" style="margin-top:10px;">
-        <span><span class="bl-dot" style="background:#185fa5;"></span>Capital</span>
-        <span><span class="bl-dot" style="background:#e24b4a;"></span>Interés</span>
-        <span><span class="bl-dot" style="background:#ef9f27;"></span>FECI</span>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div class="slabel">Saldo pendiente en el tiempo</div>
-      <div class="chart-wrap">
-        <canvas id="chartLine" role="img" aria-label="Curva descendente del saldo pendiente del préstamo mes a mes">Saldo pendiente mes a mes.</canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Amortization table -->
-  <div class="slabel">Tabla de amortización — primeros 12 meses</div>
-  <div class="table-card">
-    <div class="table-head">
-      <div class="slabel" style="margin:0;">Método francés — cuota fija</div>
-      <span style="font-size:11px;color:var(--text3);">Las cuotas se calculan sobre <strong id="thMonto">$15,000</strong></span>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Mes</th>
-            <th>Cuota</th>
-            <th>Capital</th>
-            <th>Interés</th>
-            <th>FECI</th>
-            <th>Saldo restante</th>
-          </tr>
-        </thead>
-        <tbody id="amortBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Tips -->
-  <div class="slabel">Estrategias para sacar más provecho</div>
-  <div class="tips-grid">
-    <div class="tip-card">
-      <div class="tip-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-      </div>
-      <div class="tt">Pide un poco más</div>
-      <div class="td">Si necesitas $15,000 netos, solicita ~$16,500 para compensar la comisión y el seguro que se descuentan del desembolso.</div>
-    </div>
-    <div class="tip-card">
-      <div class="tip-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      </div>
-      <div class="tt">Negocia la comisión</div>
-      <div class="td">Banco General puede reducir o eliminar la comisión de manejo para clientes con planilla directa o buen historial crediticio.</div>
-    </div>
-    <div class="tip-card">
-      <div class="tip-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 6V4h8v2"/></svg>
-      </div>
-      <div class="tt">Descuento de planilla</div>
-      <div class="td">Con descuento directo de planilla obtienes mejor tasa y condiciones. BG premia esta modalidad con menos requisitos.</div>
-    </div>
-    <div class="tip-card">
-      <div class="tip-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185fa5" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-      </div>
-      <div class="tt">Abona al capital</div>
-      <div class="td">Sin penalización por pago anticipado. Abonar extra al capital reduce el saldo y los intereses futuros de forma significativa.</div>
-    </div>
-  </div>
-
-  <div class="footnote">
-    ⚠️ Estimación referencial · Tasa banco típica: 9–12% anual · FECI: +1% legal obligatorio para préstamos &gt;$5,000 · Comisión de manejo: 1–3% (no publicada, negociable) + ITBMS 7% · Seguro de vida estimado según edad y plazo · Las cuotas siempre se calculan sobre el monto total aprobado, no el neto recibido · Para cotización oficial: <a href="https://www.bgeneral.com" target="_blank">bgeneral.com</a> · Tel: 800-5000
-  </div>
-
-</main>
+  <footer class="note">
+    Las tasas y gastos son estimaciones calculadas a partir de solo dos cotizaciones que compartiste, así que fuera de ese rango (48–144 meses) son extrapolaciones. Confirma siempre la cifra exacta con tu financiera antes de decidir — el seguro de vida suele variar con el plazo, no solo con el monto.
+  </footer>
+</div>
 
 <script>
-const $ = id => document.getElementById(id);
-const fmtD = n => '$' + n.toLocaleString('es-PA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const fmtPct = n => n.toFixed(1) + '%';
-let barChart, lineChart;
+  const montoInput = document.getElementById('monto');
+  const plazoInput = document.getElementById('plazo');
+  const cuotaMaxInput = document.getElementById('cuotaMax');
+  const tasaInput = document.getElementById('tasa');
+  const gastosInput = document.getElementById('gastos');
+  const advToggle = document.getElementById('advToggle');
+  const advPanel = document.getElementById('advPanel');
 
-function recalc() {
-  const monto = +$('sMonto').value;
-  const plazo = +$('sPlazo').value;
-  const tasaB = +$('sTasa').value;
-  const comPct = +$('sCom').value;
-  const seguro = +$('sSeg').value;
+  const montoVal = document.getElementById('montoVal');
+  const plazoVal = document.getElementById('plazoVal');
+  const cuotaMaxVal = document.getElementById('cuotaMaxVal');
+  const tasaVal = document.getElementById('tasaVal');
+  const gastosVal = document.getElementById('gastosVal');
 
-  $('cMonto').textContent = '$' + monto.toLocaleString('es-PA');
-  $('cPlazo').textContent = plazo + ' meses';
-  $('cTasa').textContent = tasaB.toFixed(2) + '%';
-  $('cCom').textContent = comPct.toFixed(2) + '%';
-  $('cSeg').textContent = '$' + seguro.toFixed(0);
+  const budgetBanner = document.getElementById('budgetBanner');
+  const budgetTitle = document.getElementById('budgetTitle');
+  const budgetDetail = document.getElementById('budgetDetail');
+  const applyMaxBtn = document.getElementById('applyMaxBtn');
 
-  const feci = 1.0;
-  const tasaTotal = tasaB + feci;
-  const tm = tasaTotal / 100 / 12;
-  const cuota = monto * (tm * Math.pow(1 + tm, plazo)) / (Math.pow(1 + tm, plazo) - 1);
-  const totalPagar = cuota * plazo;
-  const costoInt = totalPagar - monto;
+  const outLiquidez = document.getElementById('outLiquidez');
+  const outLiquidezSub = document.getElementById('outLiquidezSub');
+  const outCuota = document.getElementById('outCuota');
+  const outTotal = document.getElementById('outTotal');
 
-  const comBruta = monto * (comPct / 100);
-  const comTotal = comBruta * 1.07;
-  const totalDed = comTotal + seguro;
-  const neto = monto - totalDed;
-  const pctNeto = neto / monto * 100;
+  const ledgerMonto = document.getElementById('ledgerMonto');
+  const ledgerGastos = document.getElementById('ledgerGastos');
+  const ledgerLiquidez = document.getElementById('ledgerLiquidez');
+  const ledgerIntereses = document.getElementById('ledgerIntereses');
+  const ledgerTotal = document.getElementById('ledgerTotal');
 
-  // KPIs
-  $('kCuota').textContent = fmtD(cuota);
-  $('kNeto').textContent = fmtD(neto);
-  $('kNetoPct').textContent = pctNeto.toFixed(1) + '% del monto aprobado';
-  $('kTotal').textContent = fmtD(totalPagar);
-  $('kCosto').textContent = fmtD(costoInt);
-  $('kTasaEf').textContent = tasaTotal.toFixed(2) + '%';
-  $('kDed').textContent = fmtD(totalDed);
+  // referencia: dos cotizaciones reales
+  const REF = { n1: 144, r1: 1.20143, n2: 48, r2: 1.48347 };
+  const DEFAULT_FEE_PCT = 12.857142857142856;
 
-  // Hero
-  $('heroAmt').textContent = fmtD(neto);
-  $('heroSub').textContent = 'de ' + fmtD(monto) + ' solicitados';
-  $('pctMonto').textContent = fmtD(monto);
-  $('pctCom').textContent = '−' + fmtD(comTotal);
-  $('pctSeg').textContent = '−' + fmtD(seguro);
-  $('pctNeto').textContent = fmtD(neto) + ' (' + pctNeto.toFixed(1) + '%)';
+  let manualTasa = false;
+  let manualGastos = false;
 
-  // DB rows
-  $('dbMonto').textContent = fmtD(monto);
-  $('dbComNote').textContent = comPct.toFixed(2) + '% × ' + fmtD(monto) + ' + ITBMS = ' + fmtD(comTotal);
-  $('dbCom').textContent = '−' + fmtD(comTotal);
-  $('dbSeg').textContent = '−' + fmtD(seguro);
-  $('dbNeto').textContent = fmtD(neto);
-  $('thMonto').textContent = fmtD(monto);
-
-  // Bar
-  const tmB = tasaB / 100 / 12;
-  const tmF = feci / 100 / 12;
-  let saldo = monto;
-  let totalIntereses = 0, totalFeci = 0;
-  const rows = [];
-  for (let i = 1; i <= plazo; i++) {
-    const interes = saldo * tmB;
-    const feciMes = saldo * tmF;
-    const capital = cuota - interes - feciMes;
-    saldo = Math.max(saldo - capital, 0);
-    totalIntereses += interes;
-    totalFeci += feciMes;
-    rows.push({ mes: i, cuota, capital, interes, feciMes, saldo });
+  function estimateRate(n) {
+    const slope = (REF.r1 - REF.r2) / (REF.n1 - REF.n2);
+    let r = REF.r1 + slope * (n - REF.n1);
+    if (r < 0.5) r = 0.5;
+    if (r > 3.5) r = 3.5;
+    return r;
   }
 
-  const grandTotal = totalPagar + totalDed;
-  const pCap = monto / grandTotal * 100;
-  const pInt = totalIntereses / grandTotal * 100;
-  const pFeci = totalFeci / grandTotal * 100;
-  const pDed = totalDed / grandTotal * 100;
-
-  $('bCapital').style.width = pCap.toFixed(1) + '%';
-  $('bInteres').style.width = pInt.toFixed(1) + '%';
-  $('bFeci').style.width = pFeci.toFixed(1) + '%';
-  $('bDed').style.width = pDed.toFixed(1) + '%';
-  $('bCapital').textContent = pCap > 8 ? fmtPct(pCap) : '';
-  $('bInteres').textContent = pInt > 8 ? fmtPct(pInt) : '';
-  $('bFeci').textContent = pFeci > 6 ? fmtPct(pFeci) : '';
-  $('bDed').textContent = pDed > 6 ? fmtPct(pDed) : '';
-  $('lgCap').textContent = fmtPct(pCap);
-  $('lgInt').textContent = fmtPct(pInt);
-  $('lgFeci').textContent = fmtPct(pFeci);
-  $('lgDed').textContent = fmtPct(pDed);
-
-  // Amort table
-  const tbody = $('amortBody');
-  tbody.innerHTML = '';
-  rows.slice(0, 12).forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="c-gray">${r.mes}</td>
-      <td class="c-blue">${fmtD(r.cuota)}</td>
-      <td class="c-green">${fmtD(r.capital)}</td>
-      <td class="c-red">${fmtD(r.interes)}</td>
-      <td class="c-amber">${fmtD(r.feciMes)}</td>
-      <td>${fmtD(r.saldo)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Bar chart
-  const anios = Math.ceil(plazo / 12);
-  const labAno = [], dCap = [], dInt = [], dFeci = [];
-  for (let a = 0; a < anios; a++) {
-    labAno.push('Año ' + (a + 1));
-    let sc = 0, si = 0, sf = 0;
-    for (let i = a * 12; i < Math.min((a + 1) * 12, plazo); i++) {
-      sc += rows[i].capital; si += rows[i].interes; sf += rows[i].feciMes;
-    }
-    dCap.push(Math.round(sc)); dInt.push(Math.round(si)); dFeci.push(Math.round(sf));
+  function money(v) {
+    return v.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  if (barChart) barChart.destroy();
-  barChart = new Chart($('chartBar'), {
-    type: 'bar',
-    data: {
-      labels: labAno,
-      datasets: [
-        { label: 'Capital', data: dCap, backgroundColor: '#185fa5', borderRadius: 3 },
-        { label: 'Interés', data: dInt, backgroundColor: '#e24b4a', borderRadius: 3 },
-        { label: 'FECI', data: dFeci, backgroundColor: '#ef9f27', borderRadius: 3 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString('es-PA') } }
-      },
-      scales: {
-        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 }, autoSkip: false } },
-        y: { stacked: true, ticks: { callback: v => '$' + v.toLocaleString('es-PA'), font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
-      }
-    }
-  });
-
-  // Line chart
-  const step = Math.max(1, Math.floor(rows.length / 20));
-  const labMes = [], dSaldo = [];
-  for (let i = 0; i < rows.length; i += step) {
-    labMes.push('M' + (i + 1));
-    dSaldo.push(Math.round(rows[i].saldo));
+  function maxMontoForCuota(cuotaCap, n, r) {
+    if (r === 0) return cuotaCap * n;
+    return cuotaCap * (1 - Math.pow(1 + r, -n)) / r;
   }
-  labMes.push('M' + plazo); dSaldo.push(0);
 
-  if (lineChart) lineChart.destroy();
-  lineChart = new Chart($('chartLine'), {
-    type: 'line',
-    data: {
-      labels: labMes,
-      datasets: [{
-        label: 'Saldo',
-        data: dSaldo,
-        borderColor: '#185fa5',
-        backgroundColor: 'rgba(24,95,165,0.08)',
-        borderWidth: 2,
-        pointRadius: 0,
-        fill: true,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ' Saldo: $' + ctx.parsed.y.toLocaleString('es-PA') } }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-        y: { ticks: { callback: v => '$' + v.toLocaleString('es-PA'), font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } }
-      }
+  function calc() {
+    const monto = parseFloat(montoInput.value) || 0;
+    const n = parseInt(plazoInput.value, 10);
+    const cuotaCap = parseFloat(cuotaMaxInput.value) || 0;
+
+    if (!manualTasa) tasaInput.value = estimateRate(n).toFixed(3);
+    if (!manualGastos) gastosInput.value = DEFAULT_FEE_PCT.toFixed(2);
+
+    const tasaPct = parseFloat(tasaInput.value) || 0;
+    const gastosPct = parseFloat(gastosInput.value) || 0;
+
+    const r = tasaPct / 100;
+    const cuota = r === 0 ? monto / n : monto * r / (1 - Math.pow(1 + r, -n));
+    const totalPagar = cuota * n;
+    const intereses = totalPagar - monto;
+    const gastosMonto = monto * (gastosPct / 100);
+    const liquidez = monto - gastosMonto;
+
+    montoVal.textContent = money(monto).replace('.00', '');
+    plazoVal.textContent = n + ' meses';
+    cuotaMaxVal.textContent = money(cuotaCap);
+    tasaVal.textContent = tasaPct.toFixed(2) + '%/mes';
+    gastosVal.textContent = gastosPct.toFixed(2) + '%';
+
+    outLiquidez.textContent = money(liquidez);
+    outLiquidezSub.textContent = `del préstamo de ${money(monto).replace('.00','')}, tras ${gastosPct.toFixed(2)}% en gastos y seguro`;
+    outCuota.textContent = money(cuota);
+    outTotal.textContent = money(totalPagar);
+
+    ledgerMonto.textContent = money(monto);
+    ledgerGastos.textContent = '−' + money(gastosMonto);
+    ledgerLiquidez.textContent = money(liquidez);
+    ledgerIntereses.textContent = money(intereses);
+    ledgerTotal.textContent = money(totalPagar);
+
+    // aviso de presupuesto: la cuota no puede superar el tope
+    const maxMonto = maxMontoForCuota(cuotaCap, n, r);
+    if (cuota > cuotaCap + 0.005) {
+      budgetBanner.classList.add('over');
+      budgetTitle.textContent = '⚠ esta cuota supera tu límite';
+      budgetDetail.textContent = `a ${n} meses, una cuota de ${money(cuota)} pasa tu tope de ${money(cuotaCap)}. El monto máximo que puedes pedir a este plazo es ${money(maxMonto).replace('.00','')}.`;
+      applyMaxBtn.textContent = `usar ${money(maxMonto).replace('.00','')} como monto (el máximo a este plazo)`;
+      applyMaxBtn.classList.add('show');
+    } else {
+      budgetBanner.classList.remove('over');
+      budgetTitle.textContent = '✓ dentro de tu presupuesto';
+      budgetDetail.textContent = `la cuota de ${money(cuota)} queda por debajo de tu límite de ${money(cuotaCap)}. A este plazo podrías pedir hasta ${money(maxMonto).replace('.00','')} sin pasarte.`;
+      applyMaxBtn.classList.remove('show');
     }
-  });
-}
+  }
 
-['sMonto', 'sPlazo', 'sTasa', 'sCom', 'sSeg'].forEach(id => $(id).addEventListener('input', recalc));
-recalc();
+  montoInput.addEventListener('input', calc);
+  plazoInput.addEventListener('input', calc);
+  cuotaMaxInput.addEventListener('input', calc);
+  tasaInput.addEventListener('input', () => { manualTasa = true; calc(); });
+  gastosInput.addEventListener('input', () => { manualGastos = true; calc(); });
+  applyMaxBtn.addEventListener('click', () => {
+    const n = parseInt(plazoInput.value, 10);
+    const cuotaCap = parseFloat(cuotaMaxInput.value) || 0;
+    const tasaPct = parseFloat(tasaInput.value) || 0;
+    const r = tasaPct / 100;
+    const maxMonto = maxMontoForCuota(cuotaCap, n, r);
+    montoInput.value = maxMonto.toFixed(0);
+    calc();
+  });
+
+  advToggle.addEventListener('click', () => {
+    const open = advPanel.classList.toggle('open');
+    advToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  calc();
 </script>
 </body>
 </html>

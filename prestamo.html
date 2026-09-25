@@ -61,40 +61,46 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100%;
-    padding: 32px 20px 48px;
+    padding: 20px 20px 32px;
     padding-left: max(20px, env(safe-area-inset-left, 0px));
     padding-right: max(20px, env(safe-area-inset-right, 0px));
   }
-  .wrap { max-width: 1000px; margin: 0 auto; overflow-x: hidden; }
+  .wrap { max-width: 1180px; margin: 0 auto; overflow-x: hidden; }
 
-  header { margin-bottom: 28px; }
+  header { margin-bottom: 20px; }
   .eyebrow { color: var(--accent); font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: 0.02em; }
   h1 {
     font-family: 'Fraunces', serif;
     font-weight: 500;
-    font-size: clamp(28px, 5vw, 40px);
+    font-size: clamp(24px, 3.4vw, 32px);
     margin: 6px 0 8px;
-    line-height: 1.1;
+    line-height: 1.15;
   }
-  header p { color: var(--muted); max-width: 60ch; line-height: 1.5; margin: 0; }
+  header p { color: var(--muted); max-width: 68ch; line-height: 1.5; margin: 0; font-size: 14.5px; }
 
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    align-items: start;
   }
-  @media (max-width: 780px) {
-    .grid { grid-template-columns: 1fr; }
+  @media (min-width: 700px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .results-secondary { grid-column: 1 / -1; }
+  }
+  @media (min-width: 1080px) {
+    .grid { grid-template-columns: 0.85fr 1fr 1fr; }
+    .results-secondary { grid-column: auto; }
   }
 
   .card {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 14px;
-    padding: 24px;
+    padding: 20px;
   }
 
-  .field { margin-bottom: 22px; }
+  .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
   .field label {
     display: flex;
@@ -163,11 +169,17 @@
   .adv-panel.open { display: block; }
   .adv-note { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 10px 0 0; }
 
-  .results { display: flex; flex-direction: column; gap: 14px; }
+  .results-primary, .results-secondary { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  @media (min-width: 700px) {
+    .results-secondary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+  }
+  @media (min-width: 1080px) {
+    .results-secondary { display: flex; flex-direction: column; }
+  }
 
   .budget-banner {
     border-radius: 12px;
-    padding: 16px 18px;
+    padding: 14px 16px;
     border: 1px solid var(--accent-dim);
     background: var(--accent-dim);
   }
@@ -212,7 +224,7 @@
 
   .abono-card {
     border-radius: 12px;
-    padding: 18px 20px;
+    padding: 14px 16px;
     border: 1px solid var(--line);
     background: var(--panel-raised);
   }
@@ -233,51 +245,49 @@
     background: linear-gradient(180deg, var(--panel-raised), var(--panel));
     border: 1px solid var(--accent-dim);
     border-radius: 14px;
-    padding: 26px 24px;
+    padding: 18px 20px;
   }
-  .headline-result .label { color: var(--muted); font-size: 13.5px; margin-bottom: 6px; }
+  .headline-result .label { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
   .headline-result .number {
     font-family: 'Fraunces', serif;
     font-weight: 500;
-    font-size: clamp(34px, 6vw, 48px);
+    font-size: clamp(28px, 4vw, 36px);
     color: var(--accent);
     line-height: 1;
   }
-  .headline-result .sub { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .headline-result .sub { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
 
   .row-results {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  @media (max-width: 480px) {
-    .row-results { grid-template-columns: 1fr; }
+    gap: 10px;
   }
   .result-card {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 12px;
-    padding: 18px;
+    padding: 14px 16px;
   }
-  .result-card .label { color: var(--muted); font-size: 12.5px; margin-bottom: 6px; }
+  .result-card .label { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
   .result-card .number {
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 600;
-    font-size: 22px;
+    font-size: 19px;
   }
 
   .ledger {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 12px;
-    padding: 18px 20px;
+    padding: 14px 18px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 13.5px;
+    font-size: 13px;
   }
   .ledger .line {
     display: flex;
     justify-content: space-between;
-    padding: 7px 0;
+    gap: 10px;
+    padding: 6px 0;
     border-bottom: 1px solid var(--line);
     color: var(--muted);
   }
@@ -285,7 +295,7 @@
   .ledger .line span:last-child { color: var(--text); }
 
   footer.note {
-    margin-top: 24px;
+    margin-top: 18px;
     color: var(--muted);
     font-size: 12.5px;
     line-height: 1.6;
@@ -294,10 +304,10 @@
 
   @media (max-width: 360px) {
     body { padding-left: 14px; padding-right: 14px; }
-    .card { padding: 18px 16px; }
-    .headline-result { padding: 22px 18px; }
-    .result-card { padding: 14px; }
-    .ledger, .abono-card, .budget-banner { padding: 14px 16px; }
+    .card { padding: 16px 14px; }
+    .headline-result { padding: 16px 14px; }
+    .result-card { padding: 12px; }
+    .ledger, .abono-card, .budget-banner { padding: 12px 14px; }
   }
 </style>
 </head>
@@ -353,7 +363,7 @@
       </div>
     </div>
 
-    <div class="results">
+    <div class="results-primary">
       <div class="budget-banner" id="budgetBanner">
         <div class="budget-banner-title" id="budgetTitle">✓ dentro de tu presupuesto</div>
         <div class="budget-banner-detail" id="budgetDetail">la cuota queda por debajo de tu límite de $204.90</div>
@@ -376,7 +386,9 @@
           <div class="number" id="outTotal">$19,670</div>
         </div>
       </div>
+    </div>
 
+    <div class="results-secondary">
       <div class="ledger">
         <div class="line"><span>Monto del préstamo</span><span id="ledgerMonto">$10,000.00</span></div>
         <div class="line"><span>Gastos / seguro estimados</span><span id="ledgerGastos">−$1,286.00</span></div>
